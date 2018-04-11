@@ -11,6 +11,7 @@ INCLUDES=
 TEST_LDFLAGS=-L.. ../libz.a
 
 COMPATTESTS =
+QEMU_RUN=
 
 all: oldtests cvetests $(COMPATTESTS)
 
@@ -18,7 +19,7 @@ oldtests: #set by ../configure
 
 teststatic:
 	@TMPST=tmpst_$$; \
-	if echo hello world | ../minigzip$(EXE) | ../minigzip$(EXE) -d && ../example$(EXE) $$TMPST ; then \
+	if echo hello world | ${QEMU_RUN} ../minigzip$(EXE) | ${QEMU_RUN} ../minigzip$(EXE) -d && ${QEMU_RUN} ../example$(EXE) $$TMPST ; then \
 	  echo '		*** zlib test OK ***'; \
 	else \
 	  echo '		*** zlib test FAILED ***'; exit 1; \
@@ -31,7 +32,7 @@ testshared:
 	DYLD_LIBRARY_PATH=`pwd`/..:$(DYLD_LIBRARY_PATH) ; export DYLD_LIBRARY_PATH; \
 	SHLIB_PATH=`pwd`/..:$(SHLIB_PATH) ; export SHLIB_PATH; \
 	TMPSH=tmpsh_$$; \
-	if echo hello world | ../minigzipsh$(EXE) | ../minigzipsh$(EXE) -d && ../examplesh$(EXE) $$TMPSH; then \
+	if echo hello world | ${QEMU_RUN} ../minigzipsh$(EXE) | ${QEMU_RUN} ../minigzipsh$(EXE) -d && ${QEMU_RUN} ../examplesh$(EXE) $$TMPSH; then \
 	  echo '		*** zlib shared test OK ***'; \
 	else \
 	  echo '		*** zlib shared test FAILED ***'; exit 1; \
@@ -40,7 +41,7 @@ testshared:
 
 test64:
 	@TMP64=tmp64_$$; \
-	if echo hello world | ../minigzip64$(EXE) | ../minigzip64$(EXE) -d && ../example64$(EXE) $$TMP64; then \
+	if echo hello world | ${QEMU_RUN} ../minigzip64$(EXE) | ${QEMU_RUN} ../minigzip64$(EXE) -d && ${QEMU_RUN} ../example64$(EXE) $$TMP64; then \
 	  echo '		*** zlib 64-bit test OK ***'; \
 	else \
 	  echo '		*** zlib 64-bit test FAILED ***'; exit 1; \
@@ -53,10 +54,10 @@ cvetests: testCVEinputs
 compattests: testCVE-2003-0107
 
 testCVEinputs:
-	@EXE=$(EXE) $(SRCDIR)/testCVEinputs.sh
+	@EXE=$(EXE) QEMU_RUN="${QEMU_RUN}" $(SRCDIR)/testCVEinputs.sh
 
 testCVE-2003-0107: CVE-2003-0107$(EXE)
-	@if ./CVE-2003-0107$(EXE); then \
+	@if ${QEMU_RUN} ./CVE-2003-0107$(EXE); then \
 	  echo '                *** zlib not vulnerable to CVE-2003-0107 ***'; \
 	else \
 	  echo '                *** zlib VULNERABLE to CVE-2003-0107 ***'; exit 1; \
