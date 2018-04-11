@@ -5,6 +5,7 @@
 
 /* @(#) $Id$ */
 
+#include "zbuild.h"
 #ifdef ZLIB_COMPAT
 #  include "zlib.h"
 #else
@@ -38,7 +39,7 @@ void test_deflate       (unsigned char *compr, size_t comprLen);
 void test_inflate       (unsigned char *compr, size_t comprLen, unsigned char *uncompr, size_t uncomprLen);
 void test_large_deflate (unsigned char *compr, size_t comprLen, unsigned char *uncompr, size_t uncomprLen);
 void test_large_inflate (unsigned char *compr, size_t comprLen, unsigned char *uncompr, size_t uncomprLen);
-void test_flush         (unsigned char *compr, size_t *comprLen);
+void test_flush         (unsigned char *compr, z_size_t *comprLen);
 void test_sync          (unsigned char *compr, size_t comprLen, unsigned char *uncompr, size_t uncomprLen);
 void test_dict_deflate  (unsigned char *compr, size_t comprLen);
 void test_dict_inflate  (unsigned char *compr, size_t comprLen, unsigned char *uncompr, size_t uncomprLen);
@@ -48,18 +49,18 @@ int  main               (int argc, char *argv[]);
 static alloc_func zalloc = NULL;
 static free_func zfree = NULL;
 
-void test_compress      (unsigned char *compr, size_t comprLen,
-                            unsigned char *uncompr, size_t uncomprLen);
+void test_compress      (unsigned char *compr, z_size_t comprLen,
+                            unsigned char *uncompr, z_size_t uncomprLen);
 
 /* ===========================================================================
  * Test compress() and uncompress()
  */
-void test_compress(unsigned char *compr, size_t comprLen, unsigned char *uncompr, size_t uncomprLen)
+void test_compress(unsigned char *compr, z_size_t comprLen, unsigned char *uncompr, z_size_t uncomprLen)
 {
     int err;
     size_t len = strlen(hello)+1;
 
-    err = PREFIX(compress)(compr, &comprLen, (const unsigned char*)hello, len);
+    err = PREFIX(compress)(compr, &comprLen, (const unsigned char*)hello, (z_size_t)len);
     CHECK_ERR(err, "compress");
 
     strcpy((char*)uncompr, "garbage");
@@ -77,12 +78,12 @@ void test_compress(unsigned char *compr, size_t comprLen, unsigned char *uncompr
 
 #ifdef WITH_GZFILEOP
 void test_gzio          (const char *fname,
-                            unsigned char *uncompr, size_t uncomprLen);
+                            unsigned char *uncompr, z_size_t uncomprLen);
 
 /* ===========================================================================
  * Test read/write of .gz files
  */
-void test_gzio(const char *fname, unsigned char *uncompr, size_t uncomprLen)
+void test_gzio(const char *fname, unsigned char *uncompr, z_size_t uncomprLen)
 {
 #ifdef NO_GZCOMPRESS
     fprintf(stderr, "NO_GZCOMPRESS -- gz* functions cannot compress\n");
@@ -332,7 +333,7 @@ void test_large_inflate(unsigned char *compr, size_t comprLen, unsigned char *un
 /* ===========================================================================
  * Test deflate() with full flush
  */
-void test_flush(unsigned char *compr, size_t *comprLen)
+void test_flush(unsigned char *compr, z_size_t *comprLen)
 {
     PREFIX3(stream) c_stream; /* compression stream */
     int err;
@@ -362,7 +363,7 @@ void test_flush(unsigned char *compr, size_t *comprLen)
     err = PREFIX(deflateEnd)(&c_stream);
     CHECK_ERR(err, "deflateEnd");
 
-    *comprLen = c_stream.total_out;
+    *comprLen = (z_size_t)c_stream.total_out;
 }
 
 /* ===========================================================================
@@ -497,8 +498,8 @@ void test_dict_inflate(unsigned char *compr, size_t comprLen, unsigned char *unc
 int main(int argc, char *argv[])
 {
     unsigned char *compr, *uncompr;
-    size_t comprLen = 10000*sizeof(int); /* don't overflow on MSDOS */
-    size_t uncomprLen = comprLen;
+    z_size_t comprLen = 10000*sizeof(int); /* don't overflow on MSDOS */
+    z_size_t uncomprLen = comprLen;
     static const char* myVersion = PREFIX2(VERSION);
 
     if (zVersion()[0] != myVersion[0]) {

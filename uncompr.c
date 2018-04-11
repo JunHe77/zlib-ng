@@ -6,12 +6,11 @@
 /* @(#) $Id$ */
 
 #define ZLIB_INTERNAL
+#include "zbuild.h"
 #ifdef ZLIB_COMPAT
 # include "zlib.h"
-# define z_size_t unsigned long
 #else
 # include "zlib-ng.h"
-# define z_size_t size_t
 #endif
 
 /* ===========================================================================
@@ -73,7 +72,7 @@ int ZEXPORT PREFIX(uncompress2)(unsigned char *dest, z_size_t *destLen, const un
 
     *sourceLen -= len + stream.avail_in;
     if (dest != buf)
-        *destLen = stream.total_out;
+        *destLen = (z_size_t)stream.total_out;
     else if (stream.total_out && err == Z_BUF_ERROR)
         left = 1;
 
