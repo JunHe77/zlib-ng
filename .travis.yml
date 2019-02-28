@@ -69,6 +69,14 @@ matrix:
       compiler: clang
       env: BUILDDIR=../build TOOL="cmake ../zlib-ng"
 
+    - os: linux-arm64
+      compiler: gcc
+      env: BUILDDIR=. TOOL="cmake ."
+    - os: linux-arm
+      compiler: gcc
+      env: BUILDDIR=../build TOOL="cmake ../zlib-ng"
+
+
     # Cross compiling for arm variants
     - os: linux
       compiler: aarch64-linux-gnu-gcc
